@@ -10,7 +10,7 @@ web-chat-react/node_modules
 /coverage
 
 # production
-/build
+web-chat-backend/build
 
 # misc
 .DS_Store
