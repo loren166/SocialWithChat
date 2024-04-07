@@ -13,6 +13,7 @@ web-chat-react/node_modules
 web-chat-backend/build
 
 # misc
+.idea
 .DS_Store
 web-chat-backend/.env
 .env.local
