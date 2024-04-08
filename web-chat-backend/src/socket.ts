@@ -1,7 +1,7 @@
 import {Server} from "socket.io";
 import {Server as HTTPServer} from "http";
 import {Schema} from "mongoose";
-import {SaveMessages} from "./DB/db_save";
+import {SaveCreatedRoom, SaveMessages, SaveRoomWithConnectedUser} from "./DB/db_save";
 
 //Функция с обработкой сокетов на порту 3000
 export default function setUpSocket (server: HTTPServer) {
@@ -20,13 +20,31 @@ export default function setUpSocket (server: HTTPServer) {
 
         socket.on('send message', async (msg: string,
                                          handler: Schema.Types.ObjectId,
-                                         roomName: Schema.Types.ObjectId) => {
+                                         roomId: Schema.Types.ObjectId) => {
             try {
-                await SaveMessages(msg, handler, roomName)
+                await SaveMessages(msg, handler, roomId)
                 io.emit('chat message', msg)
             } catch (err) {
                 console.error('Error at saving message:', err)
             }
         });
+    })
+    io.on('create room', async (roomName, owner) => {
+        try {
+            await SaveCreatedRoom(roomName, owner)
+            io.emit('new room', roomName)
+        } catch (err) {
+            throw new Error('Something wrong with data.' + err)
+        }
+    });
+    io.on('connect to room', async (roomId, userId) => {
+        try {
+            if (roomId) {
+                await SaveRoomWithConnectedUser(roomId, userId)
+                io.emit('User connected', roomId, userId)
+            }
+        } catch (err) {
+            throw new Error('Error at connecting to room' + err)
+        }
     })
 }
