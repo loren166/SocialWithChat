@@ -11,7 +11,10 @@ export default function setUpSocket (server: HTTPServer) {
             methods: ["GET", "POST"]
         }
     });
-    io.on('connect', (socket) => {
+    const chatNamespace = io.of('/chat')
+    const newRoomNamespace = io.of('/createroom')
+    const connectingRoomNamespace = io.of('/room')
+    chatNamespace.on('connect', (socket) => {
         console.log(`User has been connected.`);
 
         socket.on('disconnect', () => {
@@ -29,7 +32,7 @@ export default function setUpSocket (server: HTTPServer) {
             }
         });
     })
-    io.on('create room', async (roomName, owner) => {
+    newRoomNamespace.on('create room', async (roomName, owner) => {
         try {
             await SaveCreatedRoom(roomName, owner)
             io.emit('new room', roomName)
@@ -37,7 +40,7 @@ export default function setUpSocket (server: HTTPServer) {
             throw new Error('Something wrong with data.' + err)
         }
     });
-    io.on('connect to room', async (roomId, userId) => {
+    connectingRoomNamespace.on('connect to room', async (roomId, userId) => {
         try {
             if (roomId) {
                 await SaveRoomWithConnectedUser(roomId, userId)
