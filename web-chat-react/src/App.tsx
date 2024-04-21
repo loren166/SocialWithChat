@@ -1,11 +1,12 @@
 import React from 'react';
-import ChatPage from './pages/ChatPage';
+import {BrowserRouter} from "react-router-dom";
+import AppRoutes from "./AppRoutes";
 
 const App: React.FC = () => {
     return (
-        <div className="App">
-            <ChatPage />
-        </div>
+        <BrowserRouter>
+            <AppRoutes />
+        </BrowserRouter>
     );
 };
 

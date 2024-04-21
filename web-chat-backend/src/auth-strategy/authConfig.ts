@@ -1,19 +1,19 @@
 import passport from "passport";
 import {Strategy as LocalStrategy} from "passport-local";
-import { SaveUserModel } from "../models/chatModels";
+import { UserModel } from "../models/chatModels";
 
 passport.use(new LocalStrategy(
     async (username, password, done) => {
         try {
-            const User = await SaveUserModel.findOne({username: username})
-            if (!User) {
+            const FindUser = await UserModel.findOne({username: username})
+            if (!FindUser) {
                 return done(null, false, {message: 'Incorrect username.'})
             }
-            const ValidatePassword = await User.isValidPassword(password)
+            const ValidatePassword = await FindUser.isValidPassword(password)
             if (!ValidatePassword) {
                 return done(null, false, {message: 'Incorrect password'})
             }
-            return done(null, User)
+            return done(null, FindUser)
         } catch (err) {
             return done(err)
         }

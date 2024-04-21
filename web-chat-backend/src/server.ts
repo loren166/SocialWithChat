@@ -5,7 +5,7 @@ import { createServer, Server as HTTPServer } from "http";
 import mongoose from "mongoose";
 import session from "express-session";
 import setUpSocket from "./socket";
-import pageRoutes from "./pageRoutes/pagesRoutes";
+import pageRouter from "./pageRoutes/pagesRoutes";
 import passport from "./auth-strategy/authConfig";
 
 dotenv.config();
@@ -19,7 +19,7 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
-app.use('/', pageRoutes);
+app.use('/', pageRouter);
 
 //Функция подключения к БД
 async function ConnectToDataBase () {

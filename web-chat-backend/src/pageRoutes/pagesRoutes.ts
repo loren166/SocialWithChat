@@ -1,6 +1,6 @@
 import express, {Request, Response} from "express";
 import {SaveUser} from "../DB/db_save";
-import {SaveUserModel} from "../models/chatModels";
+import {UserModel} from "../models/chatModels";
 import passport from "../auth-strategy/authConfig";
 
 const pageRouter = express.Router()
@@ -9,7 +9,7 @@ const pageRouter = express.Router()
 pageRouter.post('/register', async (req: Request, res: Response) => {
     try {
         const {username, password} = req.body
-        const existingUser = await SaveUserModel.findOne({username: username})
+        const existingUser = await UserModel.findOne({username: username})
         if (existingUser) {
             return res.status(400).json({message: 'User already exists.'})
         }

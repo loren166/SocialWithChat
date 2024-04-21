@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 interface UserInterface extends Document{
     username: string,
     password: string,
+    email: string,
+    registration_date: Date,
     isValidPassword(password: string): Promise<boolean>,
 }
 
@@ -12,6 +14,8 @@ interface UserInterface extends Document{
 const UserSchema = new Schema<UserInterface>({
     username: {type: String, required: true},
     password: {type: String, required: true},
+    email: {type: String, required: true},
+    registration_date: {type: Date}
 })
 UserSchema.methods.isValidPassword = async function (password: string): Promise<boolean> {
     try {
@@ -21,42 +25,52 @@ UserSchema.methods.isValidPassword = async function (password: string): Promise<
     }
 }
 //Модель создания пользователя
-const SaveUserModel = mongoose.model<UserInterface>('UserCreate', UserSchema)
+const UserModel = mongoose.model<UserInterface>('User', UserSchema)
 
-//Интерфейс создания комнаты
-interface RoomCreateInterface extends Document{
-    roomName: string,
-    owner: mongoose.Types.ObjectId,
-    members: mongoose.Types.ObjectId[],
+interface ChatInterface extends Document{
+    chat_name: string,
+    chat_type: string,
+    chat_status: string,
+    creation_date: Date,
 }
 
-//Схема создания комнаты
-const RoomCreateSchema = new Schema({
-    roomName: {type: String, required: true},
-    owner: {type: Schema.Types.ObjectId, ref: 'User', required: true},
-    members: [{type: Schema.Types.ObjectId,ref: 'User', required: true}],
+const ChatSchema = new Schema({
+    chat_name: {type: String, required: true},
+    chat_type: {type: String, required: true},
+    chat_status: {type: String, required: true},
+    creation_date: {type: Date}
 })
 
-//Модель создания комнаты
-const RoomCreateModel = mongoose.model<RoomCreateInterface>('RoomCreate', RoomCreateSchema)
+const ChatModel = mongoose.model<ChatInterface>('Chat', ChatSchema)
 
-
-//Интерфейс сохранения сообщений
-interface MessageInterface extends Document{
-    text: string,
-    handler: mongoose.Types.ObjectId,
-    roomId: mongoose.Types.ObjectId,
+interface ChatMemberInterface {
+    chat_id: mongoose.Types.ObjectId,
+    user_id: mongoose.Types.ObjectId,
 }
 
-// Схема сохранения сообщений
-const MessageSchema = new Schema( {
-    text: {type: String, required: true},
-    handler: {type: Schema.Types.ObjectId, required: true},
-    roomId: {type: Schema.Types.ObjectId, required: true},
+const ChatMemberSchema = new Schema({
+    chat_id: {type: Schema.Types.ObjectId, ref: 'Chat', required: true},
+    user_id: {type: Schema.Types.ObjectId, ref: 'User', required: true}
 })
 
-//Модель сохранения сообщений
-const MessageModel = mongoose.model<MessageInterface>('MessageSave', MessageSchema)
+const ChatMemberModel = mongoose.model<ChatMemberInterface>('ChatMember', ChatMemberSchema)
 
+interface MessageInterface {
+    chat_id: mongoose.Types.ObjectId,
+    user_id: mongoose.Types.ObjectId,
+    message_text: string,
+    status: string,
+    timestamp: Date,
+}
 
-export { RoomCreateModel, MessageModel, SaveUserModel }
+const MessageSchema = new Schema({
+    chat_id: {type: Schema.Types.ObjectId, ref: 'Chat', required: true},
+    user_id: {type: Schema.Types.ObjectId, ref: 'User', required: true},
+    message_text: {type: String, required: true},
+    status: {type: String, required: true},
+    timestamp: {type: Date}
+})
+
+const MessageModel = mongoose.model<MessageInterface>('Message', MessageSchema)
+
+export { UserModel, ChatModel, ChatMemberModel, MessageModel }
