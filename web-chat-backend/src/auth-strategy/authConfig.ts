@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import passport from "passport";
 import {Strategy as LocalStrategy} from "passport-local";
 import { UserModel } from "../models/chatModels";
@@ -9,7 +10,7 @@ passport.use(new LocalStrategy(
             if (!FindUser) {
                 return done(null, false, {message: 'Incorrect username.'})
             }
-            const ValidatePassword = await FindUser.isValidPassword(password)
+            const ValidatePassword = await bcrypt.compare(password, FindUser.password)
             if (!ValidatePassword) {
                 return done(null, false, {message: 'Incorrect password'})
             }

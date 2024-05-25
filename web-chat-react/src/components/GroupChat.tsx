@@ -5,16 +5,15 @@ import ChatInput from "./ChatInput";
 interface GroupChatProps {
     userId: string;
     chatName: string;
-    chat_type: "Group";
-    chat_status: "active" | "inactive";
+    chat_type: "group";
 }
 
-const GroupChat: React.FC<GroupChatProps> = ({userId, chatName, chat_type, chat_status}) => {
+const GroupChat: React.FC<GroupChatProps> = ({userId, chatName, chat_type}) => {
     const [messages, setMessages] = useState<any[]>([]);
     const socket = io('/GroupChat')
 
     useEffect(() => {
-        socket.emit('createGroupRoom', chatName, chat_type, chat_status, userId)
+        socket.emit('createGroupRoom', chatName, chat_type, userId)
 
         socket.on('sendNewGroupMessage', (newMessage) => {
             setMessages((prevMessages) => [...prevMessages, newMessage])
@@ -24,7 +23,7 @@ const GroupChat: React.FC<GroupChatProps> = ({userId, chatName, chat_type, chat_
             socket.emit('disconnect');
             socket.off();
         }
-    }, [chatName, userId, socket])
+    }, [chatName, userId, chat_type, socket])
 
     const handleSendMessage = (message: string) => {
         socket.emit('sendGroupMessage', {chat_name: chatName, user_id: userId, message_text: message, status: 'sent'})

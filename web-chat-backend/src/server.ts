@@ -10,7 +10,10 @@ import passport from "./auth-strategy/authConfig";
 
 dotenv.config();
 const app: express.Application = express();
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3001',
+    credentials: true
+}));
 app.use(express.json());
 app.use(session({
     secret: process.env.SECRET as string,

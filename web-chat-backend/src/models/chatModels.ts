@@ -1,5 +1,4 @@
 import mongoose, {Schema, Document} from "mongoose";
-import bcrypt from "bcrypt";
 
 //Интерфейс создания нового пользователя
 interface UserInterface extends Document{
@@ -7,7 +6,6 @@ interface UserInterface extends Document{
     password: string,
     email: string,
     registration_date: Date,
-    isValidPassword(password: string): Promise<boolean>,
 }
 
 //Схема пользователя
@@ -17,43 +15,36 @@ const UserSchema = new Schema<UserInterface>({
     email: {type: String, required: true},
     registration_date: {type: Date}
 })
-UserSchema.methods.isValidPassword = async function (password: string): Promise<boolean> {
-    try {
-        return await bcrypt.compare(password, this.password)
-    } catch (err) {
-        throw new Error('Incorrect password' + err)
-    }
-}
+
 //Модель создания пользователя
 const UserModel = mongoose.model<UserInterface>('User', UserSchema)
 
 interface ChatInterface extends Document{
     chat_name: string,
-    chat_type: string,
-    chat_status: string,
+    chat_type: 'personal' | 'group',
+    users: mongoose.Types.ObjectId[],
+    messages: mongoose.Types.ObjectId[],
     creation_date: Date,
 }
 
 const ChatSchema = new Schema({
     chat_name: {type: String, required: true},
-    chat_type: {type: String, required: true},
-    chat_status: {type: String, required: true},
-    creation_date: {type: Date}
+    chat_type: {type: String, enum: ['personal', 'group'], required: true},
+    users: {type: [Schema.Types.ObjectId], ref:'User', required: true,
+        validate: {
+        validator: function (this: ChatInterface, v: mongoose.Types.ObjectId[]) {
+            if (this.chat_type === 'personal') {
+                return v.length === 2;
+            } else if (this.chat_type === 'group') {
+                return v.length >= 2;
+            }
+            return false
+        }}},
+    messages: {type: Schema.Types.ObjectId, ref:'Message'},
+    creation_date: {type: Date, default: Date.now()}
 })
 
-const ChatModel = mongoose.model<ChatInterface>('Chat', ChatSchema)
-
-interface ChatMemberInterface {
-    chat_id: mongoose.Types.ObjectId,
-    user_id: mongoose.Types.ObjectId,
-}
-
-const ChatMemberSchema = new Schema({
-    chat_id: {type: Schema.Types.ObjectId, ref: 'Chat', required: true},
-    user_id: {type: Schema.Types.ObjectId, ref: 'User', required: true}
-})
-
-const ChatMemberModel = mongoose.model<ChatMemberInterface>('ChatMember', ChatMemberSchema)
+const ChatModel = mongoose.model<ChatInterface>('ChatModel', ChatSchema)
 
 interface MessageInterface {
     chat_id: mongoose.Types.ObjectId,
@@ -64,13 +55,13 @@ interface MessageInterface {
 }
 
 const MessageSchema = new Schema({
-    chat_id: {type: Schema.Types.ObjectId, ref: 'Chat', required: true},
+    chat_id: {type: Schema.Types.ObjectId, ref: 'ChatModel', required: true},
     user_id: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     message_text: {type: String, required: true},
     status: {type: String, required: true},
-    timestamp: {type: Date}
+    timestamp: {type: Date, default: Date.now()}
 })
 
 const MessageModel = mongoose.model<MessageInterface>('Message', MessageSchema)
 
-export { UserModel, ChatModel, ChatMemberModel, MessageModel }
+export { UserModel, ChatModel, MessageModel }

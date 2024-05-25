@@ -1,20 +1,30 @@
 import React from 'react';
-import {Routes, Route, Navigate} from "react-router-dom";
-import {authRoutes, publicRoutes} from "./Routes";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Chat from './pages/Chat';
+import { REGISTER_PAGE, LOGIN_PAGE, CHAT_PAGE } from './utils/consts';
+
+const localUserId = localStorage.getItem('userId');
 
 const AppRoutes = () => {
-    const isAuth = false;
+    const isAuth = localUserId !== null;
 
     return (
-        <Routes>
-            {isAuth && authRoutes.map(({ path, component }) => (
-                <Route key={path} path={path} element={component} />
-            ))}
-            {publicRoutes.map(({ path, component }) => (
-                <Route key={path} path={path} element={component} />
-            ))}
-            <Navigate to={isAuth ? "/Profile" : "/login"} />
-        </Routes>
+        <Router>
+            <Routes>
+                {isAuth ? (
+                    <>
+                        <Route path={`${CHAT_PAGE}/:chatId?`} element={<Chat userId={localUserId!} chatName="" />} />
+                        <Route path="/" element={<Navigate to={CHAT_PAGE} />} />
+                    </>
+                ) : (
+                    <Route path="/" element={<Navigate to={LOGIN_PAGE} />} />
+                )}
+                <Route path={LOGIN_PAGE} element={<Login />} />
+                <Route path={REGISTER_PAGE} element={<Register />} />
+            </Routes>
+        </Router>
     );
 };
 
